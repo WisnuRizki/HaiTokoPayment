@@ -33,6 +33,20 @@ const addProduct = async (req,res) => {
     }
 }
 
+const allProduct = async (req,res) => {
+    await Product.findAll().then(data => {
+        res.status(200).json({
+            status: 'success',
+            data: data
+        })
+    }).catch(e => {
+        res.status(200).json({
+            status: 'fial'
+        })
+    })
+}
+
 module.exports = {
-    addProduct
+    addProduct,
+    allProduct
 }

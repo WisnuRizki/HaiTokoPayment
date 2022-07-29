@@ -9,6 +9,7 @@ const {nanoid} = require('nanoid');
 const addCheckout = async (req,res) => {
     const {data} = req.body;
     let idProduct = [];
+    let grandTotal = 0;
     const paymentCode = nanoid(16)
    
     if(req.role === 'pembeli'){
@@ -29,11 +30,9 @@ const addCheckout = async (req,res) => {
                         ['id', 'ASC'],
                     ],
                 }, { transaction: t })
+
                const dataBody = JSON.parse(JSON.stringify(data))
-    
                const infoProduct = JSON.parse(JSON.stringify(findProduct))
-               let grandTotal = 0;
-    
                
                const createCheckout = await dataBody.map((item,index) => {
                    Checkout.create({
@@ -57,7 +56,8 @@ const addCheckout = async (req,res) => {
                
                 return res.status(400).json({
                     status: 'Sukses',
-                    message: 'Sukses Menambahkan Checkout'
+                    message: 'Sukses Menambahkan Checkout',
+                    paymentCode: paymentCode
                 })
     
           

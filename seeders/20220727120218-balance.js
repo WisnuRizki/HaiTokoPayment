@@ -17,12 +17,6 @@ module.exports = {
         amount: 1000000,
         createdAt: new Date(),
         updatedAt: new Date()
-      },
-      {
-        user_id: 2,
-        amount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date() 
       }
    ], {});
   },

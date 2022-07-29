@@ -85,24 +85,37 @@ const login = async (req,res) => {
         }
 
         let token = generateToken(dataUser)
-        console.log(dataUser);
+        console.log(dataParse);
 
         return res.status(200).json({
             status: "success",
             message: "user berhasil login",
-            data:data,
+            data:{
+                id: dataParse.id,
+                name: dataParse.name,
+                role: dataParse.userRole
+            },
             token: token
         })
     })
 }
 
 const topUp = async (req,res) => {
-    await Balance.update(req.body,{
+    const {amount} = req.body;
+
+    await Balance.findOne({
         where: {
             user_id: req.id
         }
     }).then(data => {
-        return res.status(200).json({
+        let newAmount = data.amount + amount;
+        Balance.update({amount: newAmount},{
+            where: {
+                user_id: req.id
+            }
+        })
+
+        res.status(200).json({
             status: 'success',
             message: 'berhasil melakukan topUp'
         })
@@ -112,6 +125,7 @@ const topUp = async (req,res) => {
             message: 'gagal melakukan topUp'
         })
     })
+
 }
 
 

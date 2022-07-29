@@ -9,8 +9,7 @@ const {
 const confirmPayment = async (req,res) => {
     const {
         user_id,
-        paymentCode,
-        paymentAmount
+        paymentCode
     } = req.body;
 
     if(req.role === 'pembeli'){
@@ -36,8 +35,15 @@ const confirmPayment = async (req,res) => {
                         ['id', 'ASC'],
                     ],
                 }, { transaction: t })
+
+                const paymentTotal = await Payment.findOne({
+                    where: {
+                        paymentCode: paymentCode
+                    },
+                    attributes: ['grandTotal']
+                }, { transaction: t })
                 
-                if(paymentAmount > findBalance.amount){
+                if(paymentTotal.grandTotal > findBalance.amount){
                     throw new Error
                 }
     
@@ -53,10 +59,11 @@ const confirmPayment = async (req,res) => {
     
                 //Mengecek jumlah barang dan barang yang dicheckout
                 for(let i = 0 ; i < findProduct.length;i++){
+                    //throw error jika jumlah barang checkout lebih besar dari jumlah barang
                     if(findCheckout[i].totalQuantity > findProduct[i].quantity){
                         throw new Error
                     }else{
-    
+                        //Mengupdate jumlah barang setelah checkout
                         let newQuantity = findProduct[i].quantity - findCheckout[i].totalQuantity;
                         await Product.update({quantity: newQuantity},{
                             where: {
@@ -65,6 +72,8 @@ const confirmPayment = async (req,res) => {
                         }, { transaction: t })
                     }
                 }
+                
+                
                 
                 await Payment.update({status: true},{
                     where: {
@@ -77,8 +86,9 @@ const confirmPayment = async (req,res) => {
                         paymentCode: paymentCode
                     }
                 }, { transaction: t })
-    
-                let newAmount = findBalance.amount - paymentAmount;
+                
+                //Update balance amount
+                let newAmount = findBalance.amount - paymentTotal.grandTotal;
                 await Balance.update({amount: newAmount},{
                     where: {
                         user_id: req.id
