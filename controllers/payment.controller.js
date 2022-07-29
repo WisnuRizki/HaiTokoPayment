@@ -8,7 +8,6 @@ const {
 
 const confirmPayment = async (req,res) => {
     const {
-        user_id,
         paymentCode
     } = req.body;
 
@@ -59,17 +58,15 @@ const confirmPayment = async (req,res) => {
     
                 //Mengecek jumlah barang dan barang yang dicheckout
                 for(let i = 0 ; i < findProduct.length;i++){
-                    //throw error jika jumlah barang checkout lebih besar dari jumlah barang
-                    if(findCheckout[i].totalQuantity > findProduct[i].quantity){
-                        throw new Error
-                    }else{
-                        //Mengupdate jumlah barang setelah checkout
+                    //Update product jika checkout barang lebih kecil dari jumlah product barang
+                    if(findCheckout[i].totalQuantity < findProduct[i].quantity){
                         let newQuantity = findProduct[i].quantity - findCheckout[i].totalQuantity;
                         await Product.update({quantity: newQuantity},{
                             where: {
                                 id: findCheckout[i].product_id
                             }
                         }, { transaction: t })
+                        
                     }
                 }
                 
@@ -100,15 +97,12 @@ const confirmPayment = async (req,res) => {
                     status: 'Sukses',
                     message: 'Sukses Melakukan Pembayaran'
                 })
-    
-          
-            });
-          
+            });  
           } catch (error) {
-            console.log(error)
+            await console.log(error)
             return res.status(400).json({
                 status: 'Gagal',
-                message: 'Gagal Melakukan Pembayaran'
+                message: 'Gagal Melakukan Pembayaran',     
             })
           }
 
@@ -117,10 +111,7 @@ const confirmPayment = async (req,res) => {
             status: 'Gagal',
             message: 'User Not Auhorized'
         })
-    }
-
-
-    
+    }   
 }
 
 module.exports = {
